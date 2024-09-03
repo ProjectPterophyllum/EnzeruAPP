@@ -1,0 +1,24 @@
+-- SQLite
+CREATE TABLE "Anime" (
+	"ID"	INTEGER,
+	"Title"	TEXT NOT NULL,
+	"Description"	TEXT NOT NULL,
+	"Type"	TEXT NOT NULL,
+	"Genre"	TEXT NOT NULL,
+	"ImageURL"	TEXT NOT NULL,
+	"ReleaseDate"	TEXT NOT NULL,
+	PRIMARY KEY("ID" AUTOINCREMENT)
+);
+CREATE TABLE "User"(
+    "ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "Password" TEXT NOT NULL
+);
+CREATE TABLE "UserAnimeList"(
+    "ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "UserID" INTEGER,
+    "AnimeID" INTEGER,
+    "Status" BOOLEAN,
+    FOREIGN KEY (UserID) REFERENCES User(ID),
+    FOREIGN KEY (AnimeID) REFERENCES AnimeList(ID)
+)
