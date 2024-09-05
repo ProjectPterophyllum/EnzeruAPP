@@ -58,11 +58,13 @@ namespace EnzeruAPP.Enzeru.DBManager
                         CREATE TABLE IF NOT EXISTS Anime (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Title TEXT NOT NULL,
+                            Rating TEXT NOT NULL,
                             Description TEXT NOT NULL,
                             Type TEXT NOT NULL,
                             Genre TEXT NOT NULL,
                             ImageURL TEXT NOT NULL,
-                            ReleaseDate TEXT NOT NULL
+                            ReleaseDate TEXT NOT NULL,
+                            Url TEXT NOT NULL
                         );";
 
                     string createUserTableQuery = @"

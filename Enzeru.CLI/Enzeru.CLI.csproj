@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\Enzeru.DBManager\Enzeru.DBManager.csproj" />
+    <ProjectReference Include="..\Enzeru.Parcer\Enzeru.Parcer.csproj" />
+    <ProjectReference Include="..\Enzeru.Models\Enzeru.Models.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
