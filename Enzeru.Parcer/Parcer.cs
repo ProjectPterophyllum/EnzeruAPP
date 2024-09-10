@@ -12,6 +12,12 @@ public class AnimeRatingParcer
     private readonly HttpClient _httpClient;
     private readonly IBrowsingContext _context;
 
+    public AnimeRatingParcer(HttpClient httpClient, IBrowsingContext context)
+    {
+        _httpClient = httpClient;
+        _context = context;
+    }
+
     public AnimeRatingParcer()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -136,6 +142,21 @@ public class AnimeRatingParcer
         {
             Console.WriteLine($"Ошибка при получении дополнительной информации: {ex.Message}");
         }
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
+    public override string? ToString()
+    {
+        return base.ToString();
     }
 }
 //2-5200
