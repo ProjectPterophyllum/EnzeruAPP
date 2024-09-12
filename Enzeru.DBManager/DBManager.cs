@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Data.SQLite;
+using System.Security.Cryptography.X509Certificates;
 
 namespace EnzeruAPP.Enzeru.DBManager
 {
@@ -10,8 +11,15 @@ namespace EnzeruAPP.Enzeru.DBManager
         private const string _dBFolderPath = "./Enzeru.DBs";
         private const string _connectionString = $"Data Source={_dBFolderPath}/{_dBFileName};Version=3;";
 
+        public async Task<SQLiteConnection> GetConnectionAsync()
+        {
+            SQLiteConnection connection = new SQLiteConnection(_connectionString);
+            await connection.OpenAsync();
+            return connection;
+        }
 
-        public static void InitializeDatabase()
+
+        public static async Task InitializeDatabaseAsync()
         {
 
             if (!Directory.Exists(_dBFolderPath))
@@ -22,22 +30,20 @@ namespace EnzeruAPP.Enzeru.DBManager
 
             if (!File.Exists($"{_dBFolderPath}/{_dBFileName}"))
             {
-                CreateDatabase();
+                await CreateDatabaseAsync();
             }
 
-            CreateTables();
+            await CreateTablesAsync();
         }
 
 
-        private static void CreateDatabase()
+        private static async Task CreateDatabaseAsync()
         {
             try
             {
-                using (var connection = new SQLiteConnection(_connectionString))
-                {
-                    connection.Open();
-                    Console.WriteLine("База данных успешно создана.");
-                }
+                using var connection = new SQLiteConnection(_connectionString);
+                await connection.OpenAsync();
+                Console.WriteLine("База данных успешно создана.");
             }
             catch (Exception ex)
             {
@@ -46,15 +52,14 @@ namespace EnzeruAPP.Enzeru.DBManager
         }
 
 
-        private static void CreateTables()
+        private static async Task CreateTablesAsync()
         {
             try
             {
-                using (var connection = new SQLiteConnection(_connectionString))
-                {
-                    connection.Open();
+                using var connection = new SQLiteConnection(_connectionString);
+                await connection.OpenAsync();
 
-                    string createAnimeTableQuery = @"
+                string createAnimeTableQuery = @"
                         CREATE TABLE IF NOT EXISTS Anime (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Title TEXT NOT NULL,
@@ -67,14 +72,14 @@ namespace EnzeruAPP.Enzeru.DBManager
                             Url TEXT NOT NULL
                         );";
 
-                    string createUserTableQuery = @"
+                string createUserTableQuery = @"
                         CREATE TABLE IF NOT EXISTS User (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Username TEXT NOT NULL,
                             Password TEXT NOT NULL
                         );";
 
-                    string createUserAnimeListTableQuery = @"
+                string createUserAnimeListTableQuery = @"
                         CREATE TABLE IF NOT EXISTS UserAnimeList (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             UserID INTEGER,
@@ -84,23 +89,22 @@ namespace EnzeruAPP.Enzeru.DBManager
                             FOREIGN KEY (AnimeID) REFERENCES Anime(ID)
                         );";
 
-                    using (var command = new SQLiteCommand(createAnimeTableQuery, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-
-                    using (var command = new SQLiteCommand(createUserTableQuery, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-
-                    using (var command = new SQLiteCommand(createUserAnimeListTableQuery, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-
-                    Console.WriteLine("Таблицы успешно созданы или уже существуют.");
+                using (var command = new SQLiteCommand(createAnimeTableQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
                 }
+
+                using (var command = new SQLiteCommand(createUserTableQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                using (var command = new SQLiteCommand(createUserAnimeListTableQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                Console.WriteLine("Таблицы успешно созданы или уже существуют.");
             }
             catch (Exception ex)
             {

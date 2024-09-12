@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.Parcer", "Enzeru.Par
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.Models", "Enzeru.Models\Enzeru.Models.csproj", "{DD3803A6-CEED-4391-BA7A-4603D3D540CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.Repository", "Enzeru.Repository\Enzeru.Repository.csproj", "{B5654381-299C-494A-A8CF-8AF76490CBD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{DD3803A6-CEED-4391-BA7A-4603D3D540CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD3803A6-CEED-4391-BA7A-4603D3D540CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD3803A6-CEED-4391-BA7A-4603D3D540CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5654381-299C-494A-A8CF-8AF76490CBD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5654381-299C-494A-A8CF-8AF76490CBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5654381-299C-494A-A8CF-8AF76490CBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5654381-299C-494A-A8CF-8AF76490CBD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

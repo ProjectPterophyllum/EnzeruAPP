@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Enzeru.Models
+namespace EnzeruAPP.Enzeru.Models
 {
     public class User
     {
