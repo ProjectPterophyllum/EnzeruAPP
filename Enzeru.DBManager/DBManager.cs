@@ -13,7 +13,7 @@ namespace EnzeruAPP.Enzeru.DBManager
             await connection.OpenAsync();
             return connection;
         }
-        public async Task InitializeDatabaseAsync()
+        public static async Task InitializeDatabaseAsync()
         {
 
             if (!Directory.Exists(_dBFolderPath))
@@ -31,7 +31,7 @@ namespace EnzeruAPP.Enzeru.DBManager
         }
 
 
-        private async Task CreateDatabaseAsync()
+        private static async Task CreateDatabaseAsync()
         {
             try
             {
@@ -45,7 +45,7 @@ namespace EnzeruAPP.Enzeru.DBManager
         }
 
 
-        private async Task CreateTablesAsync()
+        private static async Task CreateTablesAsync()
         {
             try
             {
@@ -66,7 +66,7 @@ namespace EnzeruAPP.Enzeru.DBManager
                 string createUserTableQuery = @"
                         CREATE TABLE IF NOT EXISTS User (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                            Username TEXT NOT NULL,
+                            Username TEXT NOT NULL
                         );";
 
                 string createUserAnimeListTableQuery = @"

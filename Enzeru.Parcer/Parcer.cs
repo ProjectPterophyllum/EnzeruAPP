@@ -130,6 +130,11 @@ public class AnimeRatingParcer
                     var premiereDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
                     anime.ReleaseDate = string.Join(".", premiereDateNodes.Select(node => node.TextContent.Trim()));
                 }
+                else if (td.TextContent.Trim() == "Выпуск")
+                {
+                    var releaseDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
+                    anime.ReleaseDate = string.Join(".", releaseDateNodes.Select(node => node.TextContent.Trim()));
+                }
 
             }
             var imageNode = document.QuerySelector("img[border='1']");

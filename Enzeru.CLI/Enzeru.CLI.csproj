@@ -3,6 +3,7 @@
     <ProjectReference Include="..\Enzeru.DBManager\Enzeru.DBManager.csproj" />
     <ProjectReference Include="..\Enzeru.Parcer\Enzeru.Parcer.csproj" />
     <ProjectReference Include="..\Enzeru.Models\Enzeru.Models.csproj" />
+    <ProjectReference Include="..\Enzeru.Repository\Enzeru.Repository.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
