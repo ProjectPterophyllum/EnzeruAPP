@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Enzeru.Models\Enzeru.Models.csproj" />
+    <ProjectReference Include="..\Enzeru.DBManager\Enzeru.DBManager.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Data.SQLite;
-using System.Security.Cryptography.X509Certificates;
-
+﻿using System.Data.SQLite;
 namespace EnzeruAPP.Enzeru.DBManager
 {
     public class DBManager
@@ -11,15 +7,13 @@ namespace EnzeruAPP.Enzeru.DBManager
         private const string _dBFolderPath = "./Enzeru.DBs";
         private const string _connectionString = $"Data Source={_dBFolderPath}/{_dBFileName};Version=3;";
 
-        public async Task<SQLiteConnection> GetConnectionAsync()
+        public static async Task<SQLiteConnection> GetConnectionAsync()
         {
             SQLiteConnection connection = new SQLiteConnection(_connectionString);
             await connection.OpenAsync();
             return connection;
         }
-
-
-        public static async Task InitializeDatabaseAsync()
+        public async Task InitializeDatabaseAsync()
         {
 
             if (!Directory.Exists(_dBFolderPath))
@@ -37,12 +31,11 @@ namespace EnzeruAPP.Enzeru.DBManager
         }
 
 
-        private static async Task CreateDatabaseAsync()
+        private async Task CreateDatabaseAsync()
         {
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
-                await connection.OpenAsync();
+                using var connection = await GetConnectionAsync();
                 Console.WriteLine("База данных успешно создана.");
             }
             catch (Exception ex)
@@ -52,13 +45,11 @@ namespace EnzeruAPP.Enzeru.DBManager
         }
 
 
-        private static async Task CreateTablesAsync()
+        private async Task CreateTablesAsync()
         {
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
-                await connection.OpenAsync();
-
+                using var connection = await GetConnectionAsync();
                 string createAnimeTableQuery = @"
                         CREATE TABLE IF NOT EXISTS Anime (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +67,6 @@ namespace EnzeruAPP.Enzeru.DBManager
                         CREATE TABLE IF NOT EXISTS User (
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Username TEXT NOT NULL,
-                            Password TEXT NOT NULL
                         );";
 
                 string createUserAnimeListTableQuery = @"
