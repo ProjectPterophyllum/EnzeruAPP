@@ -4,6 +4,7 @@ using System.Text;
 using System.Web;
 using AngleSharp.Dom;
 using AngleSharp.Io.Network;
+using ImageMagick;
 
 namespace EnzeruAPP.Enzeru.Parcer;
 
@@ -22,6 +23,7 @@ public class AnimeRatingParcer
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         _httpClient = new HttpClient();
+        _httpClient.Timeout = Timeout.InfiniteTimeSpan;
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
         var config = Configuration.Default;
         var req = new HttpClientRequester(_httpClient);
@@ -32,19 +34,34 @@ public class AnimeRatingParcer
     }
     public async Task<IDocument?> GetAnimePageAsync(string url)
     {
-        try
+        var delayMs = 10000;
+        for (int attempts = 0; attempts < 5; attempts++)
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            string html = await response.Content.ReadAsStringAsync();
-            return await _context.OpenAsync(request => request.Header("Content-Type", "text/html; charset=utf-8").Content(html)) ?? throw new Exception("Не удалось загрузить страницу.");
+            try
+            {
+                var response = await _httpClient.GetAsync(url);
+                if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable || response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    Console.WriteLine($"Статус код: {response.StatusCode}, повторная попытка через {delayMs} миллисекунд");
+                    await Task.Delay(delayMs);
+                    delayMs *= 2;
+                    continue;
+                }
+                response.EnsureSuccessStatusCode();
+                string html = await response.Content.ReadAsStringAsync();
+                return await _context.OpenAsync(request => request.Header("Content-Type", "text/html; charset=utf-8").Content(html)) ?? throw new Exception("Не удалось загрузить страницу.");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Ошибка при выполнении запроса: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при загрузке страницы: {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при загрузке страницы: {ex.Message}");
-            return null;
-        }
+        return null;
     }
-
     public async Task<List<Anime>> GetAnimeListAsync(string url)
     {
         var animeList = new List<Anime>();
@@ -74,7 +91,6 @@ public class AnimeRatingParcer
                 anime.Title = HttpUtility.HtmlDecode(titleText);
                 anime.Rating = ratingText;
                 anime.Url = href;
-                GetAdditionalInfoFromAnimeAsync(anime).Wait();
                 animeList.Add(anime);
             }
         }
@@ -86,6 +102,15 @@ public class AnimeRatingParcer
         return animeList;
     }
 
+    public async Task<List<Anime>> GetAnimeListAsyncWithDelay(string url, int delayMs)
+    {
+        // Добавляем задержку перед выполнением запроса
+        await Task.Delay(delayMs);
+
+        // Выполняем парсинг
+        return await GetAnimeListAsync(url);
+    }
+
     public async Task GetAdditionalInfoFromAnimeAsync(Anime anime)
     {
         try
@@ -95,73 +120,128 @@ public class AnimeRatingParcer
                 Console.WriteLine("URL аниме отсутствует.");
                 return;
             }
-
-
-            var document = await GetAnimePageAsync(anime.Url);
-            var selector = "td.review";
-            var typeNode = document.QuerySelectorAll(selector);
-            foreach (var td in typeNode)
+            try
             {
-                if (td.TextContent.Trim() == "Жанр")
+                var document = await GetAnimePageAsync(anime.Url);
+                if (document == null)
                 {
-                    var genreNodes = document.QuerySelectorAll("a.review[href*='list.php?public_genre']");
-                    if (genreNodes.Length > 0)
-                    {
-                        var genres = genreNodes.Select(genreNode => genreNode.TextContent.Trim()).ToList();
-                        anime.Genre = string.Join(", ", genres);
-                    }
+                    throw new Exception("Получена пустая страница.");
                 }
-                if (td.TextContent.Trim() == "Тип")
+                var selector = "td.review";
+                var typeNode = document.QuerySelectorAll(selector);
+                foreach (var td in typeNode)
                 {
-                    var targetElement = td.NextElementSibling?.NextElementSibling;
+                    if (td.TextContent.Trim() == "Жанр")
+                    {
+                        var genreNodes = document.QuerySelectorAll("a.review[href*='list.php?public_genre']");
+                        if (genreNodes.Length > 0)
+                        {
+                            var genres = genreNodes.Select(genreNode => genreNode.TextContent.Trim()).ToList();
+                            anime.Genre = string.Join(", ", genres);
+                        }
+                    }
+                    if (td.TextContent.Trim() == "Тип")
+                    {
+                        var targetElement = td.NextElementSibling?.NextElementSibling;
 
-                    if (targetElement != null)
+                        if (targetElement != null)
+                        {
+                            anime.Type = targetElement.TextContent.Trim();
+                        }
+                    }
+                    if (td.TextContent.Trim() == "Выпуск")
                     {
-                        anime.Type = targetElement.TextContent.Trim();
+                        var releaseDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
+                        anime.ReleaseDate = string.Join(".", releaseDateNodes.Select(node => node.TextContent.Trim()));
+                        break;
+                    }
+                    else if (td.TextContent.Trim() == "Премьера")
+                    {
+                        var premiereDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
+                        anime.ReleaseDate = string.Join(".", premiereDateNodes.Select(node => node.TextContent.Trim()));
+                        break;
+                    }
+                    else if (td.TextContent.Trim() == "Сезон")
+                    {
+                        var seasonDateNode = document.QuerySelector("a.review[href*='list.php?public_season']");
+                        anime.ReleaseDate = seasonDateNode.TextContent.Trim();
+                        break;
                     }
                 }
-                if (td.TextContent.Trim() == "Сезон")
-                {
-                    var seasonDateNode = document.QuerySelector("a.review[href*='list.php?public_season']");
-                    anime.ReleaseDate = seasonDateNode.TextContent.Trim();
-                }
-                else if (td.TextContent.Trim() == "Премьера")
-                {
-                    var premiereDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
-                    anime.ReleaseDate = string.Join(".", premiereDateNodes.Select(node => node.TextContent.Trim()));
-                }
-                else if (td.TextContent.Trim() == "Выпуск")
-                {
-                    var releaseDateNodes = document.QuerySelectorAll("a[href *= 'list.php?public_year']");
-                    anime.ReleaseDate = string.Join(".", releaseDateNodes.Select(node => node.TextContent.Trim()));
-                }
+                anime.Type ??= "Не указано";
+
+                anime.Genre ??= "Не указано";
+
+                anime.ReleaseDate ??= "Не указано";
+
+                var imageNode = document.QuerySelector("img[border='1']");
+                anime.ImageURL = imageNode?.GetAttribute("src") ?? "Не указано";
+
+                var descriptionNode = document.QuerySelector("p.review");
+                anime.Description = descriptionNode?.TextContent.Trim() ?? "Не указано";
+                Console.WriteLine("Дополнительная информация успешно получена. {0} {1} {2} {3} {4} ", anime.Title, anime.Type, anime.Genre, anime.ReleaseDate, anime.ImageURL);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при получении страницы: {ex.Message}");
+                anime.Description = "Не удалось получить описание аниме.";
+                anime.Type = "Неизвестно";
+                anime.Genre = "Неизвестно";
+                anime.ReleaseDate = "Неизвестно";
+                anime.ImageURL = "Неизвестно";
 
             }
-            var imageNode = document.QuerySelector("img[border='1']");
-            anime.ImageURL = imageNode?.GetAttribute("src") ?? "Не указано";
-
-            var descriptionNode = document.QuerySelector("p.review");
-            anime.Description = descriptionNode?.TextContent.Trim() ?? "Не указано";
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Ошибка при получении дополнительной информации: {ex.Message}");
         }
     }
-
-    public override bool Equals(object? obj)
+    public async Task GetAdditionalInfoFromAnimeAsyncWithDelay(Anime anime, int delayMs)
     {
-        return base.Equals(obj);
+        await Task.Delay(delayMs);
+
+        await GetAdditionalInfoFromAnimeAsync(anime);
     }
 
-    public override int GetHashCode()
+    public async Task GetAnimePoster(Anime anime)
     {
-        return base.GetHashCode();
-    }
-
-    public override string? ToString()
-    {
-        return base.ToString();
+        var path = Path.Combine(Environment.CurrentDirectory, "Images", anime.ID.ToString());
+        var fileName = anime.Title;
+        fileName = fileName.Replace("/", "-").Replace("\\", "-");
+        try
+        {
+            if (string.IsNullOrEmpty(anime.ImageURL))
+            {
+                throw new Exception("URL картинки отсутствует.");
+            }
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            if (!File.Exists(Path.Combine(path, $"{fileName}.jpg")))
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync(anime.ImageURL);
+                response.EnsureSuccessStatusCode();
+                using (MagickImage image = new MagickImage(response.Content.ReadAsStreamAsync().Result))
+                {
+                    await image.WriteAsync(Path.Combine(path, $"{fileName}.jpg"));
+                    Console.WriteLine("Постер успешно получен. {0} ", anime.Title);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Невозможно получить постер. Ошибка при получении постера: {ex.Message}");
+            if (!File.Exists(Path.Combine(path, $"{fileName}.jpg")))
+            {
+                using (MagickImage image = new MagickImage(MagickColors.Aquamarine, 800, 600))
+                {
+                    await image.WriteAsync(Path.Combine(path, $"{fileName}.jpg"));
+                    Console.WriteLine("Создана заглушка для постера. {0} ", anime.Title);
+                }
+            }
+            return;
+        }
     }
 }
-//2-5200

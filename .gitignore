@@ -226,3 +226,5 @@ AppPackages/
 #####
 
 *.db
+*.jpg
+*/Images

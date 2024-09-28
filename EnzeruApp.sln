@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.AvaloniaUI", "Enzeru.AvaloniaUI\Enzeru.AvaloniaUI.csproj", "{4F5821E3-0D74-4E42-AE81-AA83FFC42FCD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.DBManager", "Enzeru.DBManager\Enzeru.DBManager.csproj", "{7BE7252C-4215-4E86-816E-CDC04962F1F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enzeru.CLI", "Enzeru.CLI\Enzeru.CLI.csproj", "{F0E652C0-18A2-44F1-A1FD-444A4023559C}"
@@ -24,10 +22,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4F5821E3-0D74-4E42-AE81-AA83FFC42FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F5821E3-0D74-4E42-AE81-AA83FFC42FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F5821E3-0D74-4E42-AE81-AA83FFC42FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F5821E3-0D74-4E42-AE81-AA83FFC42FCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7BE7252C-4215-4E86-816E-CDC04962F1F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7BE7252C-4215-4E86-816E-CDC04962F1F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BE7252C-4215-4E86-816E-CDC04962F1F0}.Release|Any CPU.ActiveCfg = Release|Any CPU

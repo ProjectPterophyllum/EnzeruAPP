@@ -1,27 +1,42 @@
-﻿using System;
-using EnzeruAPP.Enzeru.DBManager;
+﻿using EnzeruAPP.Enzeru.DBManager;
 using EnzeruAPP.Enzeru.Parcer;
 using EnzeruAPP.Enzeru.Models;
-using EnzeruAPP.Enzeru.Repository;
 using EnzeruAPP.Enzeru.Repository.Classes;
-using EnzeruAPP.Enzeru.Repository.Interface;
-using System.Diagnostics;
 
-await DBManager.InitializeDatabaseAsync();
+// const int maxBegin = 5100;
+// const int pageSize = 100;
 
-Stopwatch stopwatch = new Stopwatch();
-var parser = new AnimeRatingParcer();
-string url = "http://www.world-art.ru/animation/rating_top.php";
-stopwatch.Start();
-var animeList = await parser.GetAnimeListAsync(url);
-stopwatch.Stop();
-TimeSpan ts = stopwatch.Elapsed;
-string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-ts.Hours, ts.Minutes, ts.Seconds,
-ts.Milliseconds / 10);
-Console.WriteLine("RunTime: " + elapsedTime);
+var parcer = new AnimeRatingParcer();
+
+// var DBManager = new DBManager();
+var AnimeRepository = new AnimeRepository();
+
+var animeList = new List<Anime>();
+
+// for (int begin = 0; begin <= maxBegin; begin += pageSize)
+// {
+//     int end = begin + pageSize;
+//     string url = $"http://www.world-art.ru/animation/rating_top.php?limit_1={begin}&limit_2={end}";
+//     var temp = await parcer.GetAnimeListAsync(url);
+//     animeList.AddRange(temp);
+//     Console.WriteLine($"Добавлено {animeList.Count} аниме.");
+// }
+
+// foreach (var anime in animeList)
+// {
+//     await parcer.GetAdditionalInfoFromAnimeAsync(anime);
+// }
+
+// await DBManager.InitializeDatabaseAsync();
+
+// foreach (var anime in animeList)
+// {
+//     await AnimeRepository.InsertAnimeAsync(anime);
+// }
+
+animeList = await AnimeRepository.GetAllAnimeAsync();
+
 foreach (var anime in animeList)
 {
-    var animeRepository = new AnimeRepository();
-    await animeRepository.InsertAnimeAsync(anime);
+    await parcer.GetAnimePoster(anime);
 }
